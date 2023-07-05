@@ -1,0 +1,42 @@
+{% load bootstrap4 %}
+
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+
+
+
+<h1>Vendor List</h1>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Vendor Id</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Address</th>
+      <th>City</th>
+      <th>State</th>
+      <th>Country</th>
+      <th>Postal Code</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for vendor in vendors %}
+    <tr>
+      <td>{{ vendor.vendor_id }}</td>
+      <td>{{ vendor.name }}</td>
+      <td>{{ vendor.email }}</td>
+      <td>{{ vendor.phone }}</td>
+      <td>{{ vendor.address }}</td>
+      <td>{{ vendor.city }}</td>
+      <td>{{ vendor.state }}</td>
+      <td>{{ vendor.country }}</td>
+      <td>{{ vendor.postal_code }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+  

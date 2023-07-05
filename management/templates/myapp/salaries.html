@@ -1,0 +1,32 @@
+{% load bootstrap4 %}
+
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+
+
+
+<h1>Salary List</h1>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Salary Id</th>
+      <th>Employee</th>
+      <th>Amount</th>
+      <th>Date Paid</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for salary in salaries %}
+    <tr>
+      <td>{{ salary.salary_id }}</td>
+      <td>{{ salary.employee }}</td>
+      <td>{{ salary.amount }}</td>
+      <td>{{ salary.date_paid }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+  
