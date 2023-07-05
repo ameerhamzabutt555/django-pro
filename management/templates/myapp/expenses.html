@@ -1,0 +1,34 @@
+{% load bootstrap4 %}
+
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+
+
+
+<h1>Expenses List</h1>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Expense Id</th>
+      <th>Store</th>
+      <th>Description</th>
+      <th>Amount</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for expense in  expenses %}
+    <tr>
+      <td>{{ expense.expense_id }}</td>
+      <td>{{ expense.store }}</td>
+      <td>{{ expense.description }}</td>
+      <td>{{ expense.amount }}</td>
+      <td>{{ expense.date }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+  
