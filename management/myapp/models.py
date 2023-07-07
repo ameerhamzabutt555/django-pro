@@ -107,6 +107,16 @@ class StockOutward(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            stock_inward = StockInward.objects.get(
+                stock_item_id=self.stock_item_id, store_id=self.store_id
+            )
+            stock_inward.quantity -= self.quantity
+            stock_inward.save()
+
+        super().save(*args, **kwargs)
+
 
 class StockAdjustment(models.Model):
     id = models.AutoField(primary_key=True)

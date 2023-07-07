@@ -3,6 +3,8 @@ from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.http import urlencode
 from import_export.admin import ExportActionMixin
+from django import forms
+from django.db.models import Sum
 from .models import (
     Client,
     Expenses,
@@ -25,8 +27,15 @@ class VendorAdmin(admin.ModelAdmin):
     list_display = ("name", "email", "phone", "city", "state")
 
 
+class StockInwardInline(admin.TabularInline):
+    model = StockInward
+    extra = 0
+
+
 class StoreAdmin(admin.ModelAdmin):
     list_display = ("name", "description", "location", "city", "state")
+
+    inlines = [StockInwardInline]
 
 
 class SalariesAdmin(admin.ModelAdmin):
@@ -39,6 +48,11 @@ class ExpensesAdmin(admin.ModelAdmin):
 
 class StockInwardInline(admin.TabularInline):
     model = StockInward
+    extra = 0
+
+
+class StoreInline(admin.TabularInline):
+    model = Store
     extra = 0
 
 
@@ -72,8 +86,59 @@ class StockInwardAdmin(ExportActionMixin, admin.ModelAdmin):
     list_filter = [field.name for field in StockInward._meta.fields]
 
 
-class StockOutwardAdmin(admin.ModelAdmin):
+class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
+    print(StockOutward._meta.get_fields())
+    print(StockInward._meta.get_fields())
+
+    def stock_inward_quantityce(self, obj):
+        stock_item_id = obj.stock_item_id
+        store_id = obj.store_id
+        stock_inward = StockInward.objects.get(
+            stock_item_id=stock_item_id, store_id=store_id
+        )
+        return stock_inward.quantity
+
+    def unit_price(self, obj):
+        return format_html("{}", obj.stock_item_id.unit_price)
+
+    def total_price(self, obj):
+        return format_html("{}", obj.stock_item_id.unit_price * obj.quantity)
+
+    readonly_fields = ("unit_price", "total_price")
+
+    unit_price.short_description = "unit_price"
+
+    def save_model(self, request, obj, form, change):
+        # Check if the instance is being updated
+        if change:
+            original_outward = StockOutward.objects.get(pk=obj.pk)
+            original_quantity = original_outward.quantity
+
+            # Calculate the difference in quantity
+            quantity_difference = obj.quantity - original_quantity
+
+            print(
+                "quantity_difference = obj.quantity - original_quantity",
+                quantity_difference,
+                obj.quantity,
+                original_quantity,
+            )
+            # Get the corresponding StockInward instance
+            stock_inward = StockInward.objects.get(
+                stock_item_id=obj.stock_item_id, store_id=obj.store_id
+            )
+
+            stock_inward.quantity = stock_inward.quantity - quantity_difference
+            stock_inward.save()
+
+        super().save_model(request, obj, form, change)
+
+    stock_inward_quantityce.short_description = "stock_inward_quantityce"
+
     list_display = [field.name for field in StockOutward._meta.get_fields()]
+    list_display.insert(4, "unit_price")
+    list_display.insert(5, "total_price")
+    list_display.append("stock_inward_quantityce")
     list_filter = [field.name for field in StockOutward._meta.fields]
 
 
