@@ -7,9 +7,15 @@ class SalaryInline(admin.TabularInline):
     model = Salary
     extra = 0
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj:  # Check if editing an existing employee
+            return ["created_at", "updated_at"]
+        else:  # Creating a new employee
+            return []  # Allow editing all fields
+
 
 class EmployeeAdmin(admin.ModelAdmin):
-    # inlines = [SalaryInline]
+    inlines = [SalaryInline]
 
     list_display = [
         "id",
