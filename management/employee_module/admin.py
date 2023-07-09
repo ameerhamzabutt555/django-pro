@@ -19,7 +19,7 @@ class EmployeeAdmin(admin.ModelAdmin):
 class SalaryAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Salary._meta.get_fields()]
     list_filter = [field.name for field in Salary._meta.fields]
-    search_fields = list_filter
+    search_fields = ['amount', 'employee__user__username','date']
     list_per_page = 25
 
 
