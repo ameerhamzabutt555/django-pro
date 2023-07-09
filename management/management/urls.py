@@ -17,9 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls import include
+from django.conf import settings
+from django.conf.urls.static import static
 
+
+admin.site.site_header = "Managment System"
+admin.site.site_title = "Managment System Portal"
+admin.site.index_title = "Managment System Portal"
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("", include("myapp.urls")),
-]
+    path("", admin.site.urls),
+    path("myapp", include("myapp.urls")),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

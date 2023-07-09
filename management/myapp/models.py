@@ -88,6 +88,23 @@ class StockInward(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        if not self.invoice_number:
+            # Generate invoice number if it's not set
+            self.invoice_number = self.generate_invoice_number()
+
+        super().save(*args, **kwargs)
+
+    def generate_invoice_number(self):
+        # Generate invoice number using a specific format
+        last_invoice = StockInward.objects.order_by("-id").first()
+        last_id = last_invoice.id if last_invoice else 0
+        new_id = last_id + 1
+
+        vendor_id = self.vendor_id.vendor_id
+        store_id = self.store_id.store_id
+        return f"INV-VN-{vendor_id}-ST-{store_id}-QT-{self.quantity}-{new_id:05d}"
+
 
 class StockOutward(models.Model):
     id = models.AutoField(primary_key=True)
@@ -114,8 +131,18 @@ class StockOutward(models.Model):
             )
             stock_inward.quantity -= self.quantity
             stock_inward.save()
-
+            self.recipient = self.generate_recipient_number()
         super().save(*args, **kwargs)
+
+    def generate_recipient_number(self):
+        # Generate invoice number using a specific format
+        recipient = StockOutward.objects.order_by("-id").first()
+        last_id = recipient.id if recipient else 0
+        new_id = last_id + 1
+
+        stock_item_id = self.stock_item_id.id
+        store_id = self.store_id.store_id
+        return f"INV-SIT-{stock_item_id}-ST-{store_id}-QT-{self.quantity}-{new_id:05d}"
 
 
 class StockAdjustment(models.Model):

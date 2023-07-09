@@ -5,7 +5,7 @@ from django.utils.http import urlencode
 from import_export.admin import ExportActionMixin
 from django import forms
 from django.db.models import Sum
-from .models import (
+from myapp.models import (
     Client,
     Expenses,
     Vendor,
@@ -15,7 +15,7 @@ from .models import (
     StockOutward,
     StockAdjustment,
 )
-from django.contrib import admin
+from django.urls import path, reverse
 
 
 class ClientAdmin(admin.ModelAdmin):
@@ -92,11 +92,12 @@ class StockInwardAdmin(ExportActionMixin, admin.ModelAdmin):
     search_fields = list_display
     list_per_page = 25
 
+    readonly_fields = [
+        "invoice_number",
+    ]
+
 
 class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
-    print(StockOutward._meta.get_fields())
-    print(StockInward._meta.get_fields())
-
     def stock_inward_quantityce(self, obj):
         stock_item_id = obj.stock_item_id
         store_id = obj.store_id
@@ -108,12 +109,10 @@ class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
     def unit_price(self, obj):
         return format_html("{}", obj.stock_item_id.unit_price)
 
+    unit_price.short_description = "unit_price"
+
     def total_price(self, obj):
         return format_html("{}", obj.stock_item_id.unit_price * obj.quantity)
-
-    readonly_fields = ("unit_price", "total_price")
-
-    unit_price.short_description = "unit_price"
 
     def save_model(self, request, obj, form, change):
         # Check if the instance is being updated
@@ -142,13 +141,28 @@ class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
 
     stock_inward_quantityce.short_description = "stock_inward_quantityce"
 
-    list_display = [field.name for field in StockOutward._meta.get_fields()]
+    list_display = [
+        "store_id",
+        "stock_item_id",
+        "quantity",
+        "customer_id",
+        "recipient",
+        "reason",
+        "outward_date",
+    ]
     list_display.insert(4, "unit_price")
     list_display.insert(5, "total_price")
     list_display.append("stock_inward_quantityce")
     search_fields = list_display
     list_per_page = 25
     list_filter = [field.name for field in StockOutward._meta.fields]
+    readonly_fields = [
+        "recipient",
+        "unit_price",
+        "total_price",
+        "created_at",
+        "updated_at",
+    ]
 
 
 class StockAdjustmentAdmin(admin.ModelAdmin):
