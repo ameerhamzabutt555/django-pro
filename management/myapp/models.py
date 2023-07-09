@@ -135,15 +135,6 @@ class StockAdjustment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class Salaries(models.Model):
-    salary_id = models.AutoField(primary_key=True)
-    employee = models.ForeignKey(Client, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date_paid = models.DateField()
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
 class Expenses(models.Model):
     expense_id = models.AutoField(primary_key=True)
     store = models.ForeignKey(Store, on_delete=models.CASCADE)

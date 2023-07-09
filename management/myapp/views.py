@@ -6,10 +6,9 @@ from .serializers import (
     ClientSerializer,
     VendorSerializer,
     StoreSerializer,
-    SalariesSerializer,
     ExpensesSerializer,
 )
-from .models import Client, Vendor, Store, Salaries, Expenses
+from .models import Client, Vendor, Store, Expenses
 
 
 def index(request):
@@ -44,21 +43,6 @@ def expenes(request):
         error_message = "API request failed"
         # Handle the error condition
     return render(request, "myapp/expenses.html", {"expenses": expenses_data})
-
-
-def salary(request):
-    api_url = (
-        "http://127.0.0.1:8000/myapp/salaries/"  # Replace with your API endpoint URL
-    )
-    response = requests.get(api_url)
-
-    if response.status_code == 200:
-        salaries_data = response.json()
-        # Process the API data as needed
-    else:
-        error_message = "API request failed"
-        # Handle the error condition
-    return render(request, "myapp/salaries.html", {"salaries": salaries_data})
 
 
 def store(request):
@@ -99,11 +83,6 @@ class ClientListAPIView(generics.ListAPIView):
 class ExpenessListAPIView(generics.ListAPIView):
     queryset = Expenses.objects.all()
     serializer_class = ExpensesSerializer
-
-
-class SalariesListAPIView(generics.ListAPIView):
-    queryset = Salaries.objects.all()
-    serializer_class = SalariesSerializer
 
 
 class StoresListAPIView(generics.ListAPIView):

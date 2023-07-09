@@ -10,7 +10,6 @@ from .models import (
     Expenses,
     Vendor,
     Store,
-    Salaries,
     StockItems,
     StockInward,
     StockOutward,
@@ -21,10 +20,14 @@ from django.contrib import admin
 
 class ClientAdmin(admin.ModelAdmin):
     list_display = ("name", "email", "phone", "city", "state")
+    search_fields = list_display
+    list_per_page = 25
 
 
 class VendorAdmin(admin.ModelAdmin):
     list_display = ("name", "email", "phone", "city", "state")
+    search_fields = list_display
+    list_per_page = 25
 
 
 class StockInwardInline(admin.TabularInline):
@@ -34,16 +37,16 @@ class StockInwardInline(admin.TabularInline):
 
 class StoreAdmin(admin.ModelAdmin):
     list_display = ("name", "description", "location", "city", "state")
+    search_fields = list_display
+    list_per_page = 25
 
     inlines = [StockInwardInline]
 
 
-class SalariesAdmin(admin.ModelAdmin):
-    list_display = ("employee", "amount", "date_paid")
-
-
 class ExpensesAdmin(admin.ModelAdmin):
     list_display = ("store", "description", "amount", "date")
+    search_fields = list_display
+    list_per_page = 25
 
 
 class StockInwardInline(admin.TabularInline):
@@ -63,6 +66,8 @@ class StockItemsAdmin(admin.ModelAdmin):
         "unit_price",
         "get_stock_inward",
     )
+    search_fields = list_display
+    list_per_page = 25
 
     inlines = [StockInwardInline]
 
@@ -84,6 +89,8 @@ class StockInwardAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display.append("unit_price")
 
     list_filter = [field.name for field in StockInward._meta.fields]
+    search_fields = list_display
+    list_per_page = 25
 
 
 class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
@@ -139,18 +146,21 @@ class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display.insert(4, "unit_price")
     list_display.insert(5, "total_price")
     list_display.append("stock_inward_quantityce")
+    search_fields = list_display
+    list_per_page = 25
     list_filter = [field.name for field in StockOutward._meta.fields]
 
 
 class StockAdjustmentAdmin(admin.ModelAdmin):
     list_display = [field.name for field in StockAdjustment._meta.get_fields()]
     list_filter = [field.name for field in StockAdjustment._meta.fields]
+    search_fields = list_display
+    list_per_page = 25
 
 
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Vendor, VendorAdmin)
 admin.site.register(Store, StoreAdmin)
-admin.site.register(Salaries, SalariesAdmin)
 admin.site.register(Expenses, ExpensesAdmin)
 admin.site.register(StockItems, StockItemsAdmin)
 admin.site.register(StockInward, StockInwardAdmin)
