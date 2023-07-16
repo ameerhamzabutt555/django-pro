@@ -95,6 +95,20 @@ class StockInward(models.Model):
 
         super().save(*args, **kwargs)
 
+        # Create an expense record
+        expense_description = f"Stock Inward - {self.stock_item_id.name}"
+        expense_amount = self.stock_item_id.unit_price * self.quantity
+        expense_date = timezone.now().date()
+
+        # Assuming `self.store_id` is the store associated with the expense
+        expense = Expenses(
+            store=self.store_id,
+            description=expense_description,
+            amount=expense_amount,
+            date=expense_date,
+        )
+        expense.save()
+
     def generate_invoice_number(self):
         # Generate invoice number using a specific format
         last_invoice = StockInward.objects.order_by("-id").first()
@@ -126,11 +140,12 @@ class StockOutward(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            stock_inward = StockInward.objects.get(
+            stock_inward = StockInward.objects.filter(
                 stock_item_id=self.stock_item_id, store_id=self.store_id
-            )
-            stock_inward.quantity -= self.quantity
-            stock_inward.save()
+            ).first()
+            if stock_inward:
+                stock_inward.quantity -= self.quantity
+                stock_inward.save()
             self.recipient = self.generate_recipient_number()
         super().save(*args, **kwargs)
 
