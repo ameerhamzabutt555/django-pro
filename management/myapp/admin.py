@@ -46,7 +46,7 @@ class StoreAdmin(ExportActionMixin,admin.ModelAdmin):
       
 export_formats = ('csv','xls','tsv','ods','yaml','xlsx', 'json','html')
 class ExpensesAdmin(ExportActionMixin,admin.ModelAdmin):
-    list_display = ("store", "description","Ref_Id", "amount", "date")
+    list_display = ("store", "description","ref_id", "amount", "date")
     search_fields = list_display
     list_per_page = 25
        
@@ -82,8 +82,20 @@ export_formats = ('csv','xls','tsv','ods','yaml','xlsx', 'json','html')
 
 
 class StockInwardAdmin(ExportActionMixin, admin.ModelAdmin):
+
+
     def unit_price(self, obj):
         return format_html("<b>{}</b>", obj.stock_item_id.unit_price)
+    
+    def save_model(self, request, obj, form, change):
+
+        if change:
+            expence = Expenses.objects.filter(ref_id=obj.invoice_number).get()
+            expence.amount = obj.stock_item_id.unit_price * obj.quantity
+            expence.save()
+
+        super().save_model(request, obj, form, change)
+
 
     readonly_fields = ("unit_price",)
 
@@ -99,8 +111,7 @@ class StockInwardAdmin(ExportActionMixin, admin.ModelAdmin):
     readonly_fields = [
         "invoice_number",
     ]
-def total_price(self, obj):
-        return format_html("{}", obj.stock_item_id.unit_price * obj.quantity)
+
 
 class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
     def stock_inward_quantityce(self, obj):
@@ -113,8 +124,6 @@ class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
 
     def unit_price(self, obj):
         return format_html("{}", obj.stock_item_id.unit_price)
-
-    unit_price.short_description = "unit_price"
 
     def total_price(self, obj):
         return format_html("{}", obj.stock_item_id.unit_price * obj.quantity)
@@ -145,6 +154,7 @@ class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
     stock_inward_quantityce.short_description = "stock_inward_quantityce"
+    unit_price.short_description = "unit_price"
 
     list_display = [
         "store_id",

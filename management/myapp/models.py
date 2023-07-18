@@ -59,8 +59,8 @@ class StockItems(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
-    created_at = models.DateTimeField(null=True)
-    updated_at = models.DateTimeField(null=True)
+    sale_ok = models.BooleanField('Can be Sold', default=True)
+    purchase_ok = models.BooleanField('Can be Purchased', default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -93,23 +93,33 @@ class StockInward(models.Model):
             # Generate invoice number if it's not set
             self.invoice_number = self.generate_invoice_number()
 
+        if not self.pk:
+            
+            Expenses.objects.create(
+                store=self.store_id,
+                description=f"Stock Inward - {self.stock_item_id.name}",
+                ref_id= self.invoice_number,
+                amount=self.stock_item_id.unit_price * self.quantity,
+                date=timezone.now().date(),
+            )
+
         super().save(*args, **kwargs)
 
-          # Calculate the expense amount
-        expense_amount = self.stock_item_id.unit_price * self.quantity
+        #   # Calculate the expense amount
+        # expense_amount = self.stock_item_id.unit_price * self.quantity
           
-        expense_description = f"Stock Inward - {self.stock_item_id.name}"
-        expense_date = timezone.now().date()
+        # expense_description = f"Stock Inward - {self.stock_item_id.name}"
+        # expense_date = timezone.now().date()
       
 
-        expense = Expenses.objects.create(
-                store=self.store_id,
-                description=expense_description,
-                Ref_Id= self.invoice_number,
-                amount=expense_amount,
-                date=expense_date,
-            )
-        super().save(*args, **kwargs)
+        # expense = Expenses.objects.create(
+        #         store=self.store_id,
+        #         description=expense_description,
+        #         ref_id= self.invoice_number,
+        #         amount=expense_amount,
+        #         date=expense_date,
+        #     )
+        # super().save(*args, **kwargs)
 
     def generate_invoice_number(self):
         # Generate invoice number using a specific format
@@ -187,6 +197,6 @@ class Expenses(models.Model):
     description = models.TextField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
-    Ref_Id = models.CharField(max_length=50, default='')
+    ref_id = models.CharField(max_length=50, default='')
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
