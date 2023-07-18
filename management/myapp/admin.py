@@ -5,12 +5,6 @@ from django.utils.http import urlencode
 from import_export.admin import ExportActionMixin
 from django import forms
 from django.db.models import Sum
-import csv
-from django.http import HttpResponse
-import openpyxl
-from openpyxl.utils import get_column_letter
-from openpyxl.drawing.image import Image
-from openpyxl.styles import Alignment
 from django.http import HttpResponse
 from myapp.models import (
     Client,
@@ -25,157 +19,40 @@ from myapp.models import (
 from django.urls import path, reverse
 
 
-class ClientAdmin(admin.ModelAdmin):
+class ClientAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display = ("name", "email", "phone", "city", "state")
     search_fields = list_display
     list_per_page = 25
+    
+export_formats = ('csv','xls','tsv','ods','yaml','xlsx', 'json','html')
 
 
-    def export_to_excel(self, request, queryset):
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="clients.xlsx"'
-
-        workbook = openpyxl.Workbook()
-        worksheet = workbook.active
-        worksheet.title = "Clients"
-
-        # Write column headers
-        headers = ["Name", "Email", "Phone", "City", "State"]
-        for col_num, header in enumerate(headers, 1):
-            col_letter = get_column_letter(col_num)
-            cell = worksheet.cell(row=1, column=col_num, value=header)
-            cell.font = openpyxl.styles.Font(bold=True)
-            cell.alignment = Alignment(horizontal="center")
-
-        # Write data rows
-        for row_num, client in enumerate(queryset, 2):
-            worksheet.cell(row=row_num, column=1, value=client.name)
-            worksheet.cell(row=row_num, column=2, value=client.email)
-            worksheet.cell(row=row_num, column=3, value=client.phone)
-            worksheet.cell(row=row_num, column=4, value=client.city)
-            worksheet.cell(row=row_num, column=5, value=client.state)
-
-        # Auto-size columns
-        for column_cells in worksheet.columns:
-            length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet.column_dimensions[column_cells[0].column_letter].width = length + 2
-
-        # Save workbook to response
-        workbook.save(response)
-        return response
-
-    export_to_excel.short_description = "Export to Excel"
-
-    actions = [export_to_excel]
-
-class VendorAdmin(admin.ModelAdmin):
+class VendorAdmin(ExportActionMixin,admin.ModelAdmin):
     list_display = ("name", "email", "phone", "city", "state")
     search_fields = list_display
     list_per_page = 25
-
-    def export_to_excel(self, request, queryset):
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="vendors.xlsx"'
-
-        workbook = openpyxl.Workbook()
-        worksheet = workbook.active
-        worksheet.title = "Vendors"
-
-        # Write column headers
-        headers = ["Name", "Email", "Phone", "City", "State"]
-        for col_num, header in enumerate(headers, 1):
-            col_letter = get_column_letter(col_num)
-            cell = worksheet.cell(row=1, column=col_num, value=header)
-            cell.font = openpyxl.styles.Font(bold=True)
-            cell.alignment = Alignment(horizontal="center")
-
-        # Write data rows
-        for row_num, vendor in enumerate(queryset, 2):
-            worksheet.cell(row=row_num, column=1, value=vendor.name)
-            worksheet.cell(row=row_num, column=2, value=vendor.email)
-            worksheet.cell(row=row_num, column=3, value=vendor.phone)
-            worksheet.cell(row=row_num, column=4, value=vendor.city)
-            worksheet.cell(row=row_num, column=5, value=vendor.state)
-
-        # Auto-size columns
-        for column_cells in worksheet.columns:
-            length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet.column_dimensions[column_cells[0].column_letter].width = length + 2
-
-        # Save workbook to response
-        workbook.save(response)
-        return response
-
-    export_to_excel.short_description = "Export to Excel"
-
-    actions = [export_to_excel]
-
+      
+export_formats = ('csv','xls','tsv','ods','yaml','xlsx', 'json','html')
 class StockInwardInline(admin.TabularInline):
     model = StockInward
     extra = 0
 
 
-class StoreAdmin(admin.ModelAdmin):
+class StoreAdmin(ExportActionMixin,admin.ModelAdmin):
     list_display = ("name", "description", "location", "city", "state")
     search_fields = list_display
     list_per_page = 25
 
-    def export_to_excel(self, request, queryset):
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="stores.xlsx"'
-
-        workbook = openpyxl.Workbook()
-        worksheet = workbook.active
-        worksheet.title = "Stores"
-
-        # Write column headers
-        headers = ["Name", "Description", "Location", "City", "State"]
-        for col_num, header in enumerate(headers, 1):
-            col_letter = get_column_letter(col_num)
-            cell = worksheet.cell(row=1, column=col_num, value=header)
-            cell.font = openpyxl.styles.Font(bold=True)
-            cell.alignment = Alignment(horizontal="center")
-
-        # Write data rows
-        for row_num, store in enumerate(queryset, 2):
-            worksheet.cell(row=row_num, column=1, value=store.name)
-            worksheet.cell(row=row_num, column=2, value=store.description)
-            worksheet.cell(row=row_num, column=3, value=store.location)
-            worksheet.cell(row=row_num, column=4, value=store.city)
-            worksheet.cell(row=row_num, column=5, value=store.state)
-
-        # Auto-size columns
-        for column_cells in worksheet.columns:
-            length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet.column_dimensions[column_cells[0].column_letter].width = length + 2
-
-        # Save workbook to response
-        workbook.save(response)
-        return response
-
-    export_to_excel.short_description = "Export to Excel"
-
-    actions = [export_to_excel]
-class ExpensesAdmin(admin.ModelAdmin):
-    list_display = ("store", "description", "amount", "date")
+      
+export_formats = ('csv','xls','tsv','ods','yaml','xlsx', 'json','html')
+class ExpensesAdmin(ExportActionMixin,admin.ModelAdmin):
+    list_display = ("store", "description","Ref_Id", "amount", "date")
     search_fields = list_display
     list_per_page = 25
-    def export_to_csv(self, request, queryset):
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="expenses.csv"'
+       
 
-        writer = csv.writer(response)
-        writer.writerow(["Store", "Description", "Amount", "Date"])
 
-        for expense in queryset:
-            writer.writerow([expense.store, expense.description, expense.amount, expense.date])
-
-        return response
-
-    export_to_csv.short_description = "Export to CSV"
-
-    actions = [export_to_csv]
-
+export_formats = ('csv','xls','tsv','ods','yaml','xlsx', 'json','html')
 class StockInwardInline(admin.TabularInline):
     model = StockInward
     extra = 0
@@ -186,7 +63,7 @@ class StoreInline(admin.TabularInline):
     extra = 0
 
 
-class StockItemsAdmin(admin.ModelAdmin):
+class StockItemsAdmin(ExportActionMixin,admin.ModelAdmin):
     list_display = (
         "name",
         "description",
@@ -200,42 +77,8 @@ class StockItemsAdmin(admin.ModelAdmin):
         return obj.stockinward_set.all().count()
 
     get_stock_inward.short_description = "Stock Inward Count"
-
-    def export_to_excel(self, request, queryset):
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="stock_items.xlsx"'
-
-        workbook = openpyxl.Workbook()
-        worksheet = workbook.active
-        worksheet.title = "Stock Items"
-
-        # Write column headers
-        headers = ["Name", "Description", "Unit Price", "Stock Inward Count"]
-        for col_num, header in enumerate(headers, 1):
-            col_letter = get_column_letter(col_num)
-            cell = worksheet.cell(row=1, column=col_num, value=header)
-            cell.font = openpyxl.styles.Font(bold=True)
-            cell.alignment = Alignment(horizontal="center")
-
-        # Write data rows
-        for row_num, stock_item in enumerate(queryset, 2):
-            worksheet.cell(row=row_num, column=1, value=stock_item.name)
-            worksheet.cell(row=row_num, column=2, value=stock_item.description)
-            worksheet.cell(row=row_num, column=3, value=stock_item.unit_price)
-            worksheet.cell(row=row_num, column=4, value=stock_item.stockinward_set.count())
-
-        # Auto-size columns
-        for column_cells in worksheet.columns:
-            length = max(len(str(cell.value)) for cell in column_cells)
-            worksheet.column_dimensions[column_cells[0].column_letter].width = length + 2
-
-        # Save workbook to response
-        workbook.save(response)
-        return response
-
-    export_to_excel.short_description = "Export to Excel"
-
-    actions = [export_to_excel]
+    
+export_formats = ('csv','xls','tsv','ods','yaml','xlsx', 'json','html')
 
 
 class StockInwardAdmin(ExportActionMixin, admin.ModelAdmin):

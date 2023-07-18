@@ -95,19 +95,21 @@ class StockInward(models.Model):
 
         super().save(*args, **kwargs)
 
-        # Create an expense record
-        expense_description = f"Stock Inward - {self.stock_item_id.name}"
+          # Calculate the expense amount
         expense_amount = self.stock_item_id.unit_price * self.quantity
+          
+        expense_description = f"Stock Inward - {self.stock_item_id.name}"
         expense_date = timezone.now().date()
+      
 
-        # Assuming `self.store_id` is the store associated with the expense
-        expense = Expenses(
-            store=self.store_id,
-            description=expense_description,
-            amount=expense_amount,
-            date=expense_date,
-        )
-        expense.save()
+        expense = Expenses.objects.create(
+                store=self.store_id,
+                description=expense_description,
+                Ref_Id= self.invoice_number,
+                amount=expense_amount,
+                date=expense_date,
+            )
+        super().save(*args, **kwargs)
 
     def generate_invoice_number(self):
         # Generate invoice number using a specific format
@@ -118,6 +120,8 @@ class StockInward(models.Model):
         vendor_id = self.vendor_id.vendor_id
         store_id = self.store_id.store_id
         return f"INV-VN-{vendor_id}-ST-{store_id}-QT-{self.quantity}-{new_id:05d}"
+
+    
 
 
 class StockOutward(models.Model):
@@ -183,5 +187,6 @@ class Expenses(models.Model):
     description = models.TextField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
+    Ref_Id = models.CharField(max_length=50, default='')
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
