@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-
+from django.core.exceptions import ValidationError
 # Create your models here.
 
 
@@ -133,11 +133,23 @@ class StockOutward(models.Model):
             stock_inward = StockInward.objects.filter(
                 stock_item_id=self.stock_item_id, store_id=self.store_id
             ).first()
-            if stock_inward:
-                stock_inward.quantity -= self.quantity
-                stock_inward.save()
-            self.recipient = self.generate_recipient_number()
+           # if stock_inward:
+            if stock_inward is None:
+                raise ValidationError("No corresponding StockInward record found.")
+
+        if stock_inward.quantity < self.quantity:
+            raise ValidationError("Not enough quantity in StockInward.")
+            # Reduce the StockInward quantity
+            
+        else:
+            stock_inward = StockInward.objects.filter(
+                stock_item_id=self.stock_item_id, store_id=self.store_id
+            ).first()
+        stock_inward.quantity -= self.quantity
+        stock_inward.save()
+        self.recipient = self.generate_recipient_number()
         super().save(*args, **kwargs)
+   
 
     def generate_recipient_number(self):
         # Generate invoice number using a specific format
