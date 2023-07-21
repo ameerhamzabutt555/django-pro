@@ -23,47 +23,41 @@ class ClientAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display = ("name", "email", "phone", "city", "state")
     search_fields = list_display
     list_per_page = 25
-    
-export_formats = ('csv','xls','tsv','ods','yaml','xlsx', 'json','html')
 
 
-class VendorAdmin(ExportActionMixin,admin.ModelAdmin):
+export_formats = ("csv", "xls", "tsv", "ods", "yaml", "xlsx", "json", "html")
+
+
+class VendorAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display = ("name", "email", "phone", "city", "state")
     search_fields = list_display
     list_per_page = 25
-      
-export_formats = ('csv','xls','tsv','ods','yaml','xlsx', 'json','html')
-class StockInwardInline(admin.TabularInline):
-    model = StockInward
+
+
+class VandorInline(admin.StackedInline):
+    model = Vendor
     extra = 0
 
 
-class StoreAdmin(ExportActionMixin,admin.ModelAdmin):
+class StoreAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display = ("name", "description", "location", "city", "state")
     search_fields = list_display
     list_per_page = 25
 
-      
-export_formats = ('csv','xls','tsv','ods','yaml','xlsx', 'json','html')
-class ExpensesAdmin(ExportActionMixin,admin.ModelAdmin):
-    list_display = ("store", "description","ref_id", "amount", "date")
+
+export_formats = ("csv", "xls", "tsv", "ods", "yaml", "xlsx", "json", "html")
+
+
+class ExpensesAdmin(ExportActionMixin, admin.ModelAdmin):
+    list_display = ("store", "description", "ref_id", "amount", "date")
     search_fields = list_display
     list_per_page = 25
-       
 
 
-export_formats = ('csv','xls','tsv','ods','yaml','xlsx', 'json','html')
-class StockInwardInline(admin.TabularInline):
-    model = StockInward
-    extra = 0
+export_formats = ("csv", "xls", "tsv", "ods", "yaml", "xlsx", "json", "html")
 
 
-class StoreInline(admin.TabularInline):
-    model = Store
-    extra = 0
-
-
-class StockItemsAdmin(ExportActionMixin,admin.ModelAdmin):
+class StockItemsAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display = (
         "name",
         "description",
@@ -77,25 +71,19 @@ class StockItemsAdmin(ExportActionMixin,admin.ModelAdmin):
         return obj.stockinward_set.all().count()
 
     get_stock_inward.short_description = "Stock Inward Count"
-    
-export_formats = ('csv','xls','tsv','ods','yaml','xlsx', 'json','html')
 
 
 class StockInwardAdmin(ExportActionMixin, admin.ModelAdmin):
-
-
     def unit_price(self, obj):
         return format_html("<b>{}</b>", obj.stock_item_id.unit_price)
-    
-    def save_model(self, request, obj, form, change):
 
+    def save_model(self, request, obj, form, change):
         if change:
             expence = Expenses.objects.filter(ref_id=obj.invoice_number).get()
             expence.amount = obj.stock_item_id.unit_price * obj.quantity
             expence.save()
 
         super().save_model(request, obj, form, change)
-
 
     readonly_fields = ("unit_price",)
 
@@ -105,7 +93,7 @@ class StockInwardAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display.append("unit_price")
 
     list_filter = [field.name for field in StockInward._meta.fields]
-    search_fields = list_display
+    # search_fields = list_display
     list_per_page = 25
 
     readonly_fields = [
@@ -117,10 +105,11 @@ class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
     def stock_inward_quantityce(self, obj):
         stock_item_id = obj.stock_item_id
         store_id = obj.store_id
-        stock_inward = StockInward.objects.get(
+        stock_inward_quantity = StockInward.objects.filter(
             stock_item_id=stock_item_id, store_id=store_id
-        )
-        return stock_inward.quantity
+        ).aggregate(Sum("quantity"))
+        print("stock_inward_quantitystock_inward_quantity,", stock_inward_quantity)
+        return stock_inward_quantity["quantity__sum"]
 
     def unit_price(self, obj):
         return format_html("{}", obj.stock_item_id.unit_price)
@@ -144,9 +133,9 @@ class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
                 original_quantity,
             )
             # Get the corresponding StockInward instance
-            stock_inward = StockInward.objects.get(
+            stock_inward = StockInward.objects.filter(
                 stock_item_id=obj.stock_item_id, store_id=obj.store_id
-            )
+            ).first()
 
             stock_inward.quantity = stock_inward.quantity - quantity_difference
             stock_inward.save()
