@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions",
-    "employee_module",
+    "employee_salary_module"
+
 ]
 
 MIDDLEWARE = [
