@@ -28,6 +28,7 @@ class AttendanceAdmin(admin.ModelAdmin):
         "date",
         "working_hours",
         "extra_hours",
+        "advance",
         "leave_type",
     )
     list_filter = ("employee", "date")
@@ -50,6 +51,7 @@ class SalaryAdmin(admin.ModelAdmin):
         "basic_salary",
         "overtime_payable",
         "allowance",
+        "total_advance",
         "gross_payable",
         "net_payable",
     ]
@@ -66,6 +68,7 @@ class SalaryAdmin(admin.ModelAdmin):
             monthly_working_days,
             monthly_paid_leaves,
             monthly_unpaid_leaves,
+            total_advance
         ) = self.calculate_leaves(obj)
         obj.leave_quota = leave_quota
         obj.monthly_paid_leaves = monthly_paid_leaves
@@ -74,6 +77,7 @@ class SalaryAdmin(admin.ModelAdmin):
         obj.payable_days = monthly_working_days + monthly_paid_leaves
         overtime_payable, over_time = self.calculate_overtime(obj)
         obj.overtime_payable, obj.over_time = overtime_payable, over_time
+        obj.total_advance = total_advance
 
         obj.gross_payable = float(
             float(obj.payable_days)
@@ -84,7 +88,7 @@ class SalaryAdmin(admin.ModelAdmin):
 
         obj.net_payable = float(obj.gross_payable) - float(
             obj.monthly_unpaid_leaves
-        ) * (float(obj.basic_salary) / float(obj.total_working_days))
+        ) * (float(obj.basic_salary) / float(obj.total_working_days)) - float(total_advance)
 
         # obj.working_days = self.calculate_working_days(obj)
         # obj.leaves = self.calculate_leaves(obj)
@@ -126,8 +130,7 @@ class SalaryAdmin(admin.ModelAdmin):
         monthly_paid_leaves = 0
         monthly_unpaid_leaves = 0
         total_paid_leaves = total_unpaid_leaves = 0
-
-        short_attendance = 0
+        total_advance = 0
 
         employee_monthly_attendance = Attendance.objects.filter(
             employee=obj.employee,
@@ -153,6 +156,7 @@ class SalaryAdmin(admin.ModelAdmin):
                 monthly_paid_leaves += 1
             if attendance.leave_type == Attendance.UNPAID_LEAVE:
                 monthly_unpaid_leaves += 1
+            total_advance += attendance.advance
 
         if total_paid_leaves > leave_quota:
             unpaid_leaves = total_paid_leaves - leave_quota
@@ -167,6 +171,7 @@ class SalaryAdmin(admin.ModelAdmin):
             monthly_working_days,
             monthly_paid_leaves,
             monthly_unpaid_leaves,
+            total_advance
         )
 
     def calculate_total_working_days(self, obj):

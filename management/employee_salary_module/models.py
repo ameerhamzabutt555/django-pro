@@ -31,10 +31,20 @@ class Attendance(models.Model):
     leave_type = models.CharField(
         max_length=10, choices=LEAVE_CHOICES, default=NO_LEAVE
     )
+    advance = models.FloatField(default=0)
     # Add other fields as needed (e.g., leave, late arrival, early departure, etc.)
 
     def __str__(self):
         return f"{self.employee} - {self.date}"
+    
+    def save(self, *args, **kwargs):
+        if self.leave_type in [self.PAID_LEAVE, self.UNPAID_LEAVE]:
+            # If leave_type is Paid or Unpaid, set working_hours to zero
+            self.working_hours = 0
+            self.extra_hours = 0
+            self.advance = 0
+
+        super().save(*args, **kwargs)
 
 
 class Salary(models.Model):
@@ -53,6 +63,7 @@ class Salary(models.Model):
     overtime_payable = models.FloatField(default=0)
     total_salary = models.FloatField(default=0)
     net_payable = models.FloatField(default=0)
+    total_advance = models.FloatField(default=0)
 
     def __str__(self):
         return f"{self.employee} - {self.month}"
