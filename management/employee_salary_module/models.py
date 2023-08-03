@@ -39,16 +39,20 @@ class Attendance(models.Model):
 
 class Salary(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    duration = models.DateField(default=None)
-    working_days = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    basic_salary = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    earned_salary = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    over_time = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    attandence = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    leaves = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    allowance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    net_payable = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    month = models.DateField(default=None)
+    basic_salary = models.FloatField(default=0)
+    allowance = models.FloatField(default=0)
+    total_working_days = models.FloatField(default=0)
+    leave_quota = models.FloatField(default=15)
+    monthly_paid_leaves = models.FloatField(default=0)
+    monthly_unpaid_leaves = models.FloatField(default=0)
+    monthly_working_days = models.FloatField(default=0)
+    payable_days = models.FloatField(default=0)
+    gross_payable = models.FloatField(default=0)
+    over_time = models.FloatField(default=0)
+    overtime_payable = models.FloatField(default=0)
+    total_salary = models.FloatField(default=0)
+    net_payable = models.FloatField(default=0)
 
     def __str__(self):
-        return f"{self.employee} - {self.duration}"
+        return f"{self.employee} - {self.month}"
