@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+
 # Create your models here.
 
 
@@ -43,24 +44,9 @@ class StockItems(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
-    sale_ok = models.BooleanField("Can be Sold", default=True)
-    purchase_ok = models.BooleanField("Can be Purchased", default=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
-
-
-class Store(models.Model):
-    store_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    location = models.CharField(max_length=200)
-    city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    country = models.CharField(max_length=100)
-    postal_code = models.CharField(max_length=20)
+    total_quantity = models.DecimalField(
+        max_digits=100, decimal_places=2, blank=True, default=0
+    )
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -74,7 +60,6 @@ class StockInward(models.Model):
         StockItems,
         on_delete=models.CASCADE,
     )
-    store_id = models.ForeignKey(Store, on_delete=models.CASCADE, null=True)
     quantity = models.IntegerField(null=True)
     vendor_id = models.ForeignKey(Vendor, on_delete=models.CASCADE, null=True)
     invoice_number = models.CharField(max_length=100, null=True)
@@ -83,6 +68,9 @@ class StockInward(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ["-created_at"]
+
     def save(self, *args, **kwargs):
         if not self.invoice_number:
             # Generate invoice number if it's not set
@@ -90,7 +78,6 @@ class StockInward(models.Model):
 
         if not self.pk:
             Expenses.objects.create(
-                store=self.store_id,
                 description=f"Stock Inward - {self.stock_item_id.name}",
                 ref_id=self.invoice_number,
                 amount=self.stock_item_id.unit_price * self.quantity,
@@ -106,18 +93,13 @@ class StockInward(models.Model):
         new_id = last_id + 1
 
         vendor_id = self.vendor_id.vendor_id
-        store_id = self.store_id.store_id
-        return f"INV-VN-{vendor_id}-ST-{store_id}-QT-{self.quantity}-{new_id:05d}"
+        return f"INV-VN-{vendor_id}-QT-{self.quantity}-{new_id:05d}"
 
 
 class StockOutward(models.Model):
     id = models.AutoField(primary_key=True)
     stock_item_id = models.ForeignKey(
         StockItems,
-        on_delete=models.CASCADE,
-    )
-    store_id = models.ForeignKey(
-        Store,
         on_delete=models.CASCADE,
     )
     quantity = models.IntegerField(null=True)
@@ -130,26 +112,12 @@ class StockOutward(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            stock_inward = StockInward.objects.filter(
-                stock_item_id=self.stock_item_id, store_id=self.store_id
-            ).first()
-           # if stock_inward:
-            if stock_inward is None:
-                raise ValidationError("No corresponding StockInward record found.")
+            stock = StockItems.objects.get(pk=self.stock_item_id.id)
 
-        if stock_inward.quantity < self.quantity:
-            raise ValidationError("Not enough quantity in StockInward.")
-            # Reduce the StockInward quantity
-            
-        else:
-            stock_inward = StockInward.objects.filter(
-                stock_item_id=self.stock_item_id, store_id=self.store_id
-            ).first()
-        stock_inward.quantity -= self.quantity
-        stock_inward.save()
-        self.recipient = self.generate_recipient_number()
+            stock.total_quantity -= self.quantity
+            stock.save()
+            self.recipient = self.generate_recipient_number()
         super().save(*args, **kwargs)
-   
 
     def generate_recipient_number(self):
         # Generate invoice number using a specific format
@@ -158,30 +126,11 @@ class StockOutward(models.Model):
         new_id = last_id + 1
 
         stock_item_id = self.stock_item_id.id
-        store_id = self.store_id.store_id
-        return f"INV-SIT-{stock_item_id}-ST-{store_id}-QT-{self.quantity}-{new_id:05d}"
-
-
-class StockAdjustment(models.Model):
-    id = models.AutoField(primary_key=True)
-    stock_item_id = models.ForeignKey(
-        StockItems,
-        on_delete=models.CASCADE,
-    )
-    store_id = models.ForeignKey(
-        Store,
-        on_delete=models.CASCADE,
-    )
-    quantity = models.IntegerField(null=True)
-    reason = models.TextField(null=True)
-    adjusted_date = models.DateTimeField(null=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True)
+        return f"INV-SIT-{stock_item_id}-QT-{self.quantity}-{new_id:05d}"
 
 
 class Expenses(models.Model):
     expense_id = models.AutoField(primary_key=True)
-    store = models.ForeignKey(Store, on_delete=models.CASCADE)
     description = models.TextField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()

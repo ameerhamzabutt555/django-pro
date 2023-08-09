@@ -10,51 +10,69 @@ from myapp.models import (
     Client,
     Expenses,
     Vendor,
-    Store,
     StockItems,
     StockInward,
     StockOutward,
-    StockAdjustment,
 )
 from django.urls import path, reverse
+from django.core.exceptions import ValidationError
+from .forms import StockOutwardForm
 
 
 class ClientAdmin(ExportActionMixin, admin.ModelAdmin):
-    list_display = ("name", "email", "phone", "city", "state")
+    list_display = (
+        "name",
+        "email",
+        "phone",
+        "city",
+        "state",
+        "created_at",
+        "updated_at",
+    )
+    readonly_fields = [
+        "created_at",
+        "updated_at",
+    ]
     search_fields = list_display
     list_per_page = 25
-
-
-export_formats = ("csv", "xls", "tsv", "ods", "yaml", "xlsx", "json", "html")
 
 
 class VendorAdmin(ExportActionMixin, admin.ModelAdmin):
-    list_display = ("name", "email", "phone", "city", "state")
+    list_display = (
+        "name",
+        "email",
+        "phone",
+        "city",
+        "state",
+        "created_at",
+        "updated_at",
+    )
+    readonly_fields = [
+        "created_at",
+        "updated_at",
+    ]
     search_fields = list_display
     list_per_page = 25
-
-
-class VandorInline(admin.StackedInline):
-    model = Vendor
-    extra = 0
-
-
-class StoreAdmin(ExportActionMixin, admin.ModelAdmin):
-    list_display = ("name", "description", "location", "city", "state")
-    search_fields = list_display
-    list_per_page = 25
-
-
-export_formats = ("csv", "xls", "tsv", "ods", "yaml", "xlsx", "json", "html")
 
 
 class ExpensesAdmin(ExportActionMixin, admin.ModelAdmin):
-    list_display = ("store", "description", "ref_id", "amount", "date")
+    list_display = (
+        "description",
+        "ref_id",
+        "amount",
+        "date",
+        "created_at",
+        "updated_at",
+    )
+    readonly_fields = [
+        "ref_id",
+        "amount",
+        "date",
+        "created_at",
+        "updated_at",
+    ]
     search_fields = list_display
     list_per_page = 25
-
-
-export_formats = ("csv", "xls", "tsv", "ods", "yaml", "xlsx", "json", "html")
 
 
 class StockItemsAdmin(ExportActionMixin, admin.ModelAdmin):
@@ -63,9 +81,14 @@ class StockItemsAdmin(ExportActionMixin, admin.ModelAdmin):
         "description",
         "unit_price",
         "get_stock_inward",
+        "total_quantity",
+        "created_at",
+        "updated_at",
     )
     search_fields = list_display
     list_per_page = 25
+
+    readonly_fields = ("total_quantity", "get_stock_inward", "created_at", "updated_at")
 
     def get_stock_inward(self, obj):
         return obj.stockinward_set.all().count()
@@ -77,6 +100,29 @@ class StockInwardAdmin(ExportActionMixin, admin.ModelAdmin):
     def unit_price(self, obj):
         return format_html("<b>{}</b>", obj.stock_item_id.unit_price)
 
+    readonly_fields = ("unit_price",)
+
+    unit_price.short_description = "unit_price"
+
+    list_display = [
+        "id",
+        "stock_item_id",
+        "quantity",
+        "vendor_id",
+        "invoice_number",
+        "purchase_order_number",
+        "received_date",
+        "unit_price",
+        "created_at",
+        "updated_at",
+    ]
+
+    list_filter = [field.name for field in StockInward._meta.fields]
+    # search_fields = list_display
+    list_per_page = 25
+
+    readonly_fields = ["invoice_number", "unit_price", "created_at", "updated_at"]
+
     def save_model(self, request, obj, form, change):
         if change:
             expence = Expenses.objects.filter(ref_id=obj.invoice_number).get()
@@ -85,37 +131,36 @@ class StockInwardAdmin(ExportActionMixin, admin.ModelAdmin):
 
         super().save_model(request, obj, form, change)
 
-    readonly_fields = ("unit_price",)
+        stock = StockItems.objects.get(pk=obj.stock_item_id.id)
+        stock.total_quantity = self.calculate_total_quantity(obj)
+        stock.save()
 
-    unit_price.short_description = "unit_price"
+    def calculate_total_quantity(self, obj):
+        total_quantity = 0
+        stockesInwords = StockInward.objects.filter(stock_item_id=obj.stock_item_id)
 
-    list_display = [field.name for field in StockInward._meta.get_fields()]
-    list_display.append("unit_price")
+        for stock in stockesInwords:
+            total_quantity += stock.quantity
 
-    list_filter = [field.name for field in StockInward._meta.fields]
-    # search_fields = list_display
-    list_per_page = 25
+        print("total quantity", total_quantity)
 
-    readonly_fields = [
-        "invoice_number",
-    ]
+        return total_quantity
 
 
 class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
-    def stock_inward_quantityce(self, obj):
-        stock_item_id = obj.stock_item_id
-        store_id = obj.store_id
-        stock_inward_quantity = StockInward.objects.filter(
-            stock_item_id=stock_item_id, store_id=store_id
-        ).aggregate(Sum("quantity"))
-        print("stock_inward_quantitystock_inward_quantity,", stock_inward_quantity)
-        return stock_inward_quantity["quantity__sum"]
+    def stock_quantity(self, obj):
+        stock_quantity = StockItems.objects.get(pk=obj.stock_item_id.id)
+        return stock_quantity.total_quantity
 
     def unit_price(self, obj):
         return format_html("{}", obj.stock_item_id.unit_price)
 
     def total_price(self, obj):
-        return format_html("{}", obj.stock_item_id.unit_price * obj.quantity)
+        print("obj.quantity", obj.quantity)
+        if obj.quantity:
+            return format_html("{}", obj.stock_item_id.unit_price * obj.quantity)
+        else:
+            return format_html("{}", obj.stock_item_id.unit_price * 0)
 
     def save_model(self, request, obj, form, change):
         # Check if the instance is being updated
@@ -133,20 +178,22 @@ class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
                 original_quantity,
             )
             # Get the corresponding StockInward instance
-            stock_inward = StockInward.objects.filter(
-                stock_item_id=obj.stock_item_id, store_id=obj.store_id
-            ).first()
+            stock = StockItems.objects.get(pk=obj.stock_item_id.id)
 
-            stock_inward.quantity = stock_inward.quantity - quantity_difference
-            stock_inward.save()
+            stock.total_quantity = self.stock_quantity(obj) - quantity_difference
+
+            # if stock.total_quantity <= 0:
+            #     raise ValidationError("No corresponding stock is empty")
+
+            stock.save()
 
         super().save_model(request, obj, form, change)
 
-    stock_inward_quantityce.short_description = "stock_inward_quantityce"
+    form = StockOutwardForm
+    stock_quantity.short_description = "stock_quantity"
     unit_price.short_description = "unit_price"
 
     list_display = [
-        "store_id",
         "stock_item_id",
         "quantity",
         "customer_id",
@@ -156,7 +203,7 @@ class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
     ]
     list_display.insert(4, "unit_price")
     list_display.insert(5, "total_price")
-    list_display.append("stock_inward_quantityce")
+    list_display.append("stock_quantity")
     search_fields = list_display
     list_per_page = 25
     list_filter = [field.name for field in StockOutward._meta.fields]
@@ -169,18 +216,9 @@ class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):
     ]
 
 
-class StockAdjustmentAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in StockAdjustment._meta.get_fields()]
-    list_filter = [field.name for field in StockAdjustment._meta.fields]
-    search_fields = list_display
-    list_per_page = 25
-
-
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Vendor, VendorAdmin)
-admin.site.register(Store, StoreAdmin)
 admin.site.register(Expenses, ExpensesAdmin)
 admin.site.register(StockItems, StockItemsAdmin)
 admin.site.register(StockInward, StockInwardAdmin)
 admin.site.register(StockOutward, StockOutwardAdmin)
-admin.site.register(StockAdjustment, StockAdjustmentAdmin)

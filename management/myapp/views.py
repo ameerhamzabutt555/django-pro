@@ -5,10 +5,9 @@ from django.http import JsonResponse
 from .serializers import (
     ClientSerializer,
     VendorSerializer,
-    StoreSerializer,
     ExpensesSerializer,
 )
-from .models import Client, Vendor, Store, Expenses
+from .models import Client, Vendor, Expenses
 
 
 def index(request):
@@ -45,21 +44,6 @@ def expenes(request):
     return render(request, "myapp/expenses.html", {"expenses": expenses_data})
 
 
-def store(request):
-    api_url = (
-        "http://127.0.0.1:8000/myapp/stores/"  # Replace with your API endpoint URL
-    )
-    response = requests.get(api_url)
-
-    if response.status_code == 200:
-        stores_data = response.json()
-        # Process the API data as needed
-    else:
-        error_message = "API request failed"
-        # Handle the error condition
-    return render(request, "myapp/store.html", {"stores": stores_data})
-
-
 def vendor(request):
     api_url = (
         "http://127.0.0.1:8000/myapp/vendors/"  # Replace with your API endpoint URL
@@ -83,11 +67,6 @@ class ClientListAPIView(generics.ListAPIView):
 class ExpenessListAPIView(generics.ListAPIView):
     queryset = Expenses.objects.all()
     serializer_class = ExpensesSerializer
-
-
-class StoresListAPIView(generics.ListAPIView):
-    queryset = Store.objects.all()
-    serializer_class = StoreSerializer
 
 
 class VendorsListAPIView(generics.ListAPIView):
