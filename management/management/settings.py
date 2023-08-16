@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     "myapp",
     "employee_salary_module",
+    "balance_sheets",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
