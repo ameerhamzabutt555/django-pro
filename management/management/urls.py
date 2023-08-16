@@ -28,4 +28,5 @@ admin.site.index_title = "Managment System Portal"
 urlpatterns = [
     path("", admin.site.urls),
     path("myapp", include("myapp.urls")),
+    path("employee_salary_module", include("employee_salary_module.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -26,6 +26,8 @@ class Salary(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     month = MonthField(default=timezone.now)
     basic_salary = models.FloatField(default=0)
+    over_time = models.FloatField(default=0)
+    over_time_payable = models.FloatField(default=0)
     leaves = models.FloatField(default=0)
     absent = models.FloatField(default=0)
     late = models.FloatField(default=0)

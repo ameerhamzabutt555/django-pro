@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Pay Slip - June 2023</title>
+    <style>
+        /* Add any CSS styling you want here */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 30px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Pay Slip - {{ salary.created_at|date:"F, Y" }}</h1>
+    <table>
+        <tr>
+            <th>Employee Name</th>
+            <td>{{full_name}}</td>
+            <th>Date</th>
+            <td>{{salary.month|date:"F, Y"}}</td>
+        </tr>
+        <tr>
+            <th>Designation</th>
+            <td>{{salary.employee.designation}}</td>
+            <th>Leave taken</th>
+            <td>{{salary.leaves}}</td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <th>Salary</th>
+            <th>Deduction</th>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <td>
+                <table>
+                    <tr>
+                        <th>
+                            Basic Salary
+                        </th>
+                        <td>
+                            {{salary.basic_salary}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Allowance
+                        </th>
+                        <td>
+                            {{salary.employee.allowance}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Medical
+                        </th>
+                        <td>
+                            {{salary.employee.medical}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Mobile Allowance
+                        </th>
+                        <td>
+                            {{salary.employee.mobile_bils}}
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+            <td>
+                <table>
+                    <tr>
+                        <th>
+                            Leaves
+                        </th>
+                        <td>
+                            {{salary.leaves}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Absents
+                        </th>
+                        <td>
+                            {{salary.absent}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Advance
+                        </th>
+                        <td>
+                            {{salary.advance}}
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <th>Total</th>
+            <td>{{total|floatformat:2}}</td>
+        </tr>
+        <tr>
+            <th>Net Payable</th>
+            <td>{{salary.net_payable|floatformat:2}}</td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        This is a computer-generated payslip. Generated on {{ salary.created_at|date:"F j, Y" }}.
+    </div>
+</body>
+
+</html>

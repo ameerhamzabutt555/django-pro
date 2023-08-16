@@ -9,9 +9,13 @@ from .serializers import (
 )
 from .models import Client, Vendor, Expenses
 
+from django.shortcuts import redirect
+
 
 def index(request):
-    return render(request, "myapp/index.html")
+    response = redirect("/admin")
+    return response
+    # return render(request, "myapp/index.html")
 
 
 def client(request):

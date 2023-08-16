@@ -32,8 +32,7 @@ ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     "myapp",
-    "rest_framework",
-    "bootstrap4",
+    "employee_salary_module",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -41,8 +40,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions",
-    "employee_salary_module"
-
 ]
 
 MIDDLEWARE = [
@@ -56,11 +53,13 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "management.urls"
+import os
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["templates"],
+        # "DIRS": ["templates"],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
