@@ -22,6 +22,8 @@ from .forms import StockOutwardForm
 class ClientAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display = (
         "name",
+        "total_balance",
+        "opening_balance",
         "email",
         "phone",
         "city",
@@ -29,10 +31,7 @@ class ClientAdmin(ExportActionMixin, admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
-    readonly_fields = [
-        "created_at",
-        "updated_at",
-    ]
+    readonly_fields = ["created_at", "updated_at"]
     search_fields = list_display
     list_per_page = 25
 
@@ -40,6 +39,8 @@ class ClientAdmin(ExportActionMixin, admin.ModelAdmin):
 class VendorAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display = (
         "name",
+        "total_balance",
+        "opening_balance",
         "email",
         "phone",
         "city",
