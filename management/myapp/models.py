@@ -15,6 +15,8 @@ class Client(models.Model):
     state = models.CharField(max_length=100)
     country = models.CharField(max_length=100)
     postal_code = models.CharField(max_length=20)
+    opening_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -32,6 +34,8 @@ class Vendor(models.Model):
     state = models.CharField(max_length=100)
     country = models.CharField(max_length=100)
     postal_code = models.CharField(max_length=20)
+    opening_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
