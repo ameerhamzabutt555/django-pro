@@ -42,4 +42,4 @@ class VendorTransaction(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.client.name} - {self.date} ({self.transaction_type})"
+        return f"{self.vendor.name} - {self.date} ({self.transaction_type})"
