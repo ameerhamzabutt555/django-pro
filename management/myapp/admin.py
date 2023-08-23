@@ -75,8 +75,24 @@ class ExpensesAdmin(ExportActionMixin, admin.ModelAdmin):
     search_fields = list_display
     list_per_page = 25
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj:  # This is for edit mode
+            return [
+                "ref_id",
+                "amount",
+                "date",
+                "created_at",
+                "updated_at",
+            ]
+        return []
+
 
 class StockItemsAdmin(ExportActionMixin, admin.ModelAdmin):
+    def get_stock_inward(self, obj):
+        return obj.stockinward_set.all().count()
+
+    get_stock_inward.short_description = "Stock Inward Count"
+
     list_display = (
         "name",
         "description",
@@ -86,43 +102,22 @@ class StockItemsAdmin(ExportActionMixin, admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
-    search_fields = list_display
+    search_fields = [
+        "name",
+        "description",
+        "unit_price",
+        "total_quantity",
+    ]
     list_per_page = 25
 
     readonly_fields = ("total_quantity", "get_stock_inward", "created_at", "updated_at")
-
-    def get_stock_inward(self, obj):
-        return obj.stockinward_set.all().count()
-
-    get_stock_inward.short_description = "Stock Inward Count"
 
 
 class StockInwardAdmin(ExportActionMixin, admin.ModelAdmin):
     def unit_price(self, obj):
         return format_html("<b>{}</b>", obj.stock_item_id.unit_price)
 
-    readonly_fields = ("unit_price",)
-
     unit_price.short_description = "unit_price"
-
-    list_display = [
-        "id",
-        "stock_item_id",
-        "quantity",
-        "vendor_id",
-        "invoice_number",
-        "purchase_order_number",
-        "received_date",
-        "unit_price",
-        "created_at",
-        "updated_at",
-    ]
-
-    list_filter = [field.name for field in StockInward._meta.fields]
-    # search_fields = list_display
-    list_per_page = 25
-
-    readonly_fields = ["invoice_number", "unit_price", "created_at", "updated_at"]
 
     def save_model(self, request, obj, form, change):
         if change:
@@ -146,6 +141,36 @@ class StockInwardAdmin(ExportActionMixin, admin.ModelAdmin):
         print("total quantity", total_quantity)
 
         return total_quantity
+
+    list_display = [
+        "id",
+        "stock_item_id",
+        "quantity",
+        "vendor_id",
+        "invoice_number",
+        "purchase_order_number",
+        "received_date",
+        "unit_price",
+        "created_at",
+        "updated_at",
+    ]
+
+    list_filter = [
+        "id",
+        "stock_item_id",
+        "quantity",
+        "vendor_id",
+        "invoice_number",
+        "purchase_order_number",
+        "received_date",
+        "created_at",
+        "updated_at",
+    ]
+    # search_fields = list_display
+    list_per_page = 25
+
+    readonly_fields = ["invoice_number", "unit_price", "created_at", "updated_at"]
+    search_fields = ["stock_item_id", "invoice_number"]
 
 
 class StockOutwardAdmin(ExportActionMixin, admin.ModelAdmin):

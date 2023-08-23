@@ -33,7 +33,11 @@ class ClientTransactionAdmin(ExportActionMixin, admin.ModelAdmin):
                 "running_balance",
                 "date",
             ]
-        return []
+        return [
+            "calculate_total_balance",
+            "running_balance",
+            "date",
+        ]
 
     def calculate_total_balance(self, obj):
         balance = obj.client.opening_balance
@@ -97,17 +101,21 @@ class VendorTransactionAdmin(ExportActionMixin, admin.ModelAdmin):
                 "running_balance",
                 "date",
             ]
-        return []
+        return [
+            "calculate_total_balance",
+            "running_balance",
+            "date",
+        ]
 
     def calculate_total_balance(self, obj):
-        balance = obj.client.opening_balance
+        balance = obj.vendor.opening_balance
 
         transactions = VendorTransaction.objects.filter(vendor=obj.vendor)
         for transaction in transactions:
             if transaction.transaction_type == "debit":
-                balance -= transaction.amount
-            else:
                 balance += transaction.amount
+            else:
+                balance -= transaction.amount
         return balance
 
     calculate_total_balance.short_description = "vendor total balance"
