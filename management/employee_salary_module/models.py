@@ -8,7 +8,7 @@ class Employee(models.Model):
     last_name = models.CharField(max_length=100)
     designation = models.CharField(max_length=100, default=None, blank=True)
     department = models.CharField(max_length=100, default=None, blank=True)
-    address = models.CharField(max_length=255, default=None, blank=True)
+    address = models.CharField(max_length=255, default=None, blank=True, null=True)
     cnic_number = models.CharField(max_length=100, default=None, blank=True)
     mobile_number_1 = models.CharField(max_length=100, default=None, blank=True)
     mobile_number_2 = models.CharField(max_length=100, default=None, blank=True)
