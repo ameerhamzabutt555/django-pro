@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,9 +32,6 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    "myapp",
-    "employee_salary_module",
-    "balance_sheets",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -41,6 +39,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions",
+    "manage_files",
+    "myapp",
+    "employee_salary_module",
+    "balance_sheets",
 ]
 
 MIDDLEWARE = [
@@ -54,7 +56,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "management.urls"
-import os
+
 
 TEMPLATES = [
     {
@@ -123,10 +125,15 @@ USE_TZ = True
 
 # STATIC_URL = 'static/'
 
-STATIC_URL = "/static/"
-STATICFILES_DIRS = [
-    ("node_modules/bootstrap/dist", "bootstrap"),
-]
+STATIC_URL = "static/"
+# STATIC_ROOT = BASE_DIR / "static/"
+STATICFILES_DIRS = [BASE_DIR / 'static/']
+
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / "media/"
+
+print("MEDIA_ROOT ___________", MEDIA_ROOT) 
 
 
 # Default primary key field type
