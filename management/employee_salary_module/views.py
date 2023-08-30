@@ -49,7 +49,7 @@ from employee_salary_module.models import Employee, Salary
 def render_pdf_view(request, id):
     salary = Salary.objects.get(pk=id)
     print("tgdsgnlkdgjdj", salary)
-    full_name = salary.employee.first_name + " " + salary.employee.last_name
+    full_name = f"{salary.employee.first_name} {salary.employee.last_name}"
     total = (
         float(salary.employee.monthly_income)
         + salary.employee.allowance

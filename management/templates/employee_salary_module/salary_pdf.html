@@ -45,7 +45,8 @@
         </tr>
         <tr>
             <th>Designation</th>
-            <td>{{salary.employee.designation}}</td>
+
+            <td>{{salary.employee.designation|default:"--"}}</td>
             <th>Leave taken</th>
             <td>{{salary.leaves}}</td>
         </tr>
