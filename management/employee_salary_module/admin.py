@@ -93,7 +93,7 @@ class SalaryAdmin(ExportActionMixin, admin.ModelAdmin):
 
         leaves_deduct = obj.leaves * (float(obj.employee.monthly_income) / 30)
         absent_deduct = obj.absent * (float(obj.employee.monthly_income) / 30) * 1.5
-        late_deduct = obj.late * (float(obj.employee.monthly_income) / 30) * 1.5
+        late_deduct = obj.late * (float(obj.employee.monthly_income) / 30 / 8) * 1.5
         advance_deduct = obj.advance
 
         obj.net_payable = (

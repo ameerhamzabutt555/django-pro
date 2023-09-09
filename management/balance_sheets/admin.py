@@ -32,11 +32,12 @@ class ClientTransactionAdmin(ExportActionMixin, admin.ModelAdmin):
                 "calculate_total_balance",
                 "running_balance",
                 "date",
+                "created_at",
+                "updated_at",
             ]
         return [
             "calculate_total_balance",
             "running_balance",
-            "date",
         ]
 
     def calculate_total_balance(self, obj):
@@ -100,11 +101,12 @@ class VendorTransactionAdmin(ExportActionMixin, admin.ModelAdmin):
                 "calculate_total_balance",
                 "running_balance",
                 "date",
+                "created_at",
+                "updated_at",
             ]
         return [
             "calculate_total_balance",
             "running_balance",
-            "date",
         ]
 
     def calculate_total_balance(self, obj):
