@@ -87,7 +87,7 @@ class SalaryAdmin(ExportActionMixin, admin.ModelAdmin):
         obj.medical = float(obj.employee.medical)
         obj.mobile_bils = float(obj.employee.mobile_bils)
 
-        obj.over_time_payable = (obj.over_time * 1.5) * (
+        obj.over_time_payable = (obj.over_time * obj.employee.overtime_rate) * (
             float(obj.employee.monthly_income) / 30 / 8
         )
 

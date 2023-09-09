@@ -14,6 +14,7 @@ class Employee(models.Model):
     mobile_number_2 = models.CharField(max_length=100, default=None, blank=True)
     hire_date = models.DateField()
     monthly_income = models.DecimalField(max_digits=10, decimal_places=2)
+    overtime_rate = models.DecimalField(max_digits=10, decimal_places=2, default=1.5)
     allowance = models.FloatField(default=0)
     medical = models.FloatField(default=0)
     mobile_bils = models.FloatField(default=0)

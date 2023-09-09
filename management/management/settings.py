@@ -127,13 +127,13 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 # STATIC_ROOT = BASE_DIR / "static/"
-STATICFILES_DIRS = [BASE_DIR / 'static/']
+STATICFILES_DIRS = [BASE_DIR / "static/"]
 
 
-MEDIA_URL = 'media/'
+MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media/"
 
-print("MEDIA_ROOT ___________", MEDIA_ROOT) 
+print("MEDIA_ROOT ___________", MEDIA_ROOT)
 
 
 # Default primary key field type
