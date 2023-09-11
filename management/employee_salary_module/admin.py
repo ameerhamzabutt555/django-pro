@@ -22,6 +22,7 @@ class EmployeeAdmin(ExportActionMixin, admin.ModelAdmin):
         "department",
         "hire_date",
         "monthly_income",
+        "net_advance",
         "allowance",
         "medical",
         "mobile_bils",
@@ -66,6 +67,7 @@ class SalaryAdmin(ExportActionMixin, admin.ModelAdmin):
         "absent",
         "late",
         "advance",
+        "advance_deduction",
         "net_payable",
         "generate_pdf_link",
     ]
@@ -87,21 +89,41 @@ class SalaryAdmin(ExportActionMixin, admin.ModelAdmin):
         obj.medical = float(obj.employee.medical)
         obj.mobile_bils = float(obj.employee.mobile_bils)
 
-        obj.over_time_payable = (obj.over_time * obj.employee.overtime_rate) * (
+        obj.over_time_payable = (obj.over_time * float(obj.employee.overtime_rate)) * (
             float(obj.employee.monthly_income) / 30 / 8
         )
 
-        leaves_deduct = obj.leaves * (float(obj.employee.monthly_income) / 30)
-        absent_deduct = obj.absent * (float(obj.employee.monthly_income) / 30) * 1.5
-        late_deduct = obj.late * (float(obj.employee.monthly_income) / 30 / 8) * 1.5
-        advance_deduct = obj.advance
+        if obj.is_late_deductable:
+            late_deduct = obj.late * (float(obj.employee.monthly_income) / 30 / 8) * 1.5
+        else:
+            late_deduct = 0
+
+        if obj.is_leaves_deductable:
+            if obj.leaves > 0:
+                obj.leaves = obj.leaves - 1
+            leaves_deduct = obj.leaves * (float(obj.employee.monthly_income) / 30)
+        else:
+            leaves_deduct = 0
+        if obj.is_absent_deductable:
+            absent_deduct = obj.absent * (float(obj.employee.monthly_income) / 30) * 1.5
+        else:
+            absent_deduct = 0
+
+        advance_deduct = (
+            obj.employee.net_advance + obj.advance
+        ) - obj.advance_deduction
+
+        if not change:
+            self.employee_obj = obj.employee
+            self.employee_obj.net_advance = advance_deduct
+            self.employee_obj.save()
 
         obj.net_payable = (
             float(obj.employee.monthly_income)
             - leaves_deduct
             - absent_deduct
             - late_deduct
-            - advance_deduct
+            - obj.advance_deduction
         ) + (
             obj.allowance + obj.medical + obj.mobile_bils + obj.over_time_payable
         ) * 1.0

@@ -26,7 +26,7 @@
         }
 
         .footer {
-            text-align: center;
+            text-align: left;
             font-size: 12px;
             margin-top: 30px;
             color: #666;
@@ -45,99 +45,56 @@
         </tr>
         <tr>
             <th>Designation</th>
-
             <td>{{salary.employee.designation|default:"--"}}</td>
-            <th>Leave taken</th>
+            <th>Department</th>
+            <td>{{salary.employee.department|default:"--"}}</td>
+        </tr>
+    </table>
+    <h1>Attandes</h1>
+    <table>
+        <tr>
+            <th>Lates</th>
+            <td>{{salary.late}}</td>
+            <th>Leaves</th>
             <td>{{salary.leaves}}</td>
+            <th>Absent</th>
+            <td>{{salary.absent}}</td>
         </tr>
     </table>
+    <h1>Salary</h1>
     <table>
         <tr>
-            <th>Salary</th>
-            <th>Deduction</th>
+            <th>Basic Salary</th>
+            <td>{{salary.basic_salary}}</td>
+            <th>Allowance</th>
+            <td>{{salary.employee.allowance}}</td>
+        </tr>
+        <tr>
+            <th>Medical</th>
+            <td>{{salary.employee.medical}}</td>
+            <th>Mobile Allowance</th>
+            <td>{{salary.employee.mobile_bils}}</td>
+        </tr>
+        <tr>
+            <th>Advance Deduction</th>
+            <td>{{salary.advance_deduction}}</td>
+            <th>Net Advance</th>
+            <td>{{salary.employee.net_advance}}</td>
         </tr>
     </table>
+    <h1>Payables</h1>
     <table>
         <tr>
-            <td>
-                <table>
-                    <tr>
-                        <th>
-                            Basic Salary
-                        </th>
-                        <td>
-                            {{salary.basic_salary}}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            Allowance
-                        </th>
-                        <td>
-                            {{salary.employee.allowance}}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            Medical
-                        </th>
-                        <td>
-                            {{salary.employee.medical}}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            Mobile Allowance
-                        </th>
-                        <td>
-                            {{salary.employee.mobile_bils}}
-                        </td>
-                    </tr>
-                </table>
-
-            </td>
-            <td>
-                <table>
-                    <tr>
-                        <th>
-                            Leaves
-                        </th>
-                        <td>
-                            {{salary.leaves}}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            Absents
-                        </th>
-                        <td>
-                            {{salary.absent}}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            Advance
-                        </th>
-                        <td>
-                            {{salary.advance}}
-                        </td>
-                    </tr>
-                </table>
-
-            </td>
-        </tr>
-    </table>
-    <table>
-        <tr>
+            <th>Overtime</th>
+            <td>{{salary.over_time}}</td>
+            <th>Overtime Payable</th>
+            <td>{{salary.over_time_payable}}</td>
             <th>Total</th>
             <td>{{total|floatformat:2}}</td>
-        </tr>
-        <tr>
             <th>Net Payable</th>
             <td>{{salary.net_payable|floatformat:2}}</td>
         </tr>
     </table>
-
     <div class="footer">
         This is a computer-generated payslip. Generated on {{ salary.created_at|date:"F j, Y" }}.
     </div>

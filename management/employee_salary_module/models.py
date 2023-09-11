@@ -16,6 +16,7 @@ class Employee(models.Model):
     monthly_income = models.DecimalField(max_digits=10, decimal_places=2)
     overtime_rate = models.DecimalField(max_digits=10, decimal_places=2, default=1.5)
     allowance = models.FloatField(default=0)
+    net_advance = models.FloatField(default=0)
     medical = models.FloatField(default=0)
     mobile_bils = models.FloatField(default=0)
 
@@ -33,6 +34,10 @@ class Salary(models.Model):
     absent = models.FloatField(default=0)
     late = models.FloatField(default=0)
     advance = models.FloatField(default=0)
+    advance_deduction = models.FloatField(default=0)
+    is_late_deductable = models.BooleanField(default=True)
+    is_leaves_deductable = models.BooleanField(default=True)
+    is_absent_deductable = models.BooleanField(default=True)
     net_payable = models.FloatField(default=0)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True, blank=True)
